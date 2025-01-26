@@ -30,4 +30,4 @@
 YMM4を起動して、`ヘルプ(H)`>`その他`>`プラグインフォルダを開く`をクリックしてください。  
 `SimpleKerningEffect`または`SimpleKerningEffectCategory`という名前のフォルダを削除することでアンインストールできます。  
 ## ライセンス
-[MIT License](./LICENSE)
+[CC0 1.0 Universal](./LICENSE)
