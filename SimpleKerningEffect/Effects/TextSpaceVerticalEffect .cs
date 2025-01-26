@@ -34,7 +34,7 @@ namespace SimpleKerningEffect.Effects
         [Display(GroupName = "文字間隔調整（縦書）", Name = "全体を調整", Description = "範囲外の文字の位置を調整する")]
         [ToggleSlider]
         public bool Adjust { get => adjust; set => Set(ref adjust, value); }
-        bool adjust = false;
+        bool adjust = true;
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
