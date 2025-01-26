@@ -33,18 +33,34 @@ namespace SimpleKerningEffect.Effects
         [AnimationSlider("F1", "%", 0, 100)]
         public Animation Opacity { get; } = new Animation(100, 0, 100);
 
-        [Display(GroupName = "描画", Name = "拡大率", Description = "拡大率")]
-        [AnimationSlider("F1", "%", 0, 400)]
-        public Animation Zoom { get; } = new Animation(100, 0, 5000);
-
-        [Display(GroupName = "描画", Name = "回転角", Description = "回転させる角度（右回り）")]
-        [AnimationSlider("F1", "°", -360, 360)]
-        public Animation Rotation { get; } = new Animation(0, -36000, 36000);
-
         [Display(GroupName = "描画", Name = "左右反転", Description = "左右反転")]
         [ToggleSlider]
         public bool Invert { get => invert; set => Set(ref invert, value); }
         bool invert = false;
+
+        [Display(GroupName = "拡大率", Name = "全体", Description = "全体の拡大率")]
+        [AnimationSlider("F1", "%", 0, 500)]
+        public Animation Zoom { get; } = new Animation(100, 0, 5000);
+
+        [Display(GroupName = "拡大率", Name = "横方向", Description = "横方向の拡大率")]
+        [AnimationSlider("F1", "%", 0, 500)]
+        public Animation ZoomX { get; } = new Animation(100, 0, 5000);
+
+        [Display(GroupName = "拡大率", Name = "縦方向", Description = "縦方向の拡大率")]
+        [AnimationSlider("F1", "%", 0, 500)]
+        public Animation ZoomY { get; } = new Animation(100, 0, 5000);
+
+        [Display(GroupName = "回転角", Name = "X軸", Description = "横方向、X軸に対する回転角")]
+        [AnimationSlider("F1", "°", -360, 360)]
+        public Animation RotationX { get; } = new Animation(0, -36000, 36000);
+
+        [Display(GroupName = "回転角", Name = "Y軸", Description = "縦方向、Y軸に対する回転角")]
+        [AnimationSlider("F1", "°", -360, 360)]
+        public Animation RotationY { get; } = new Animation(0, -36000, 36000);
+
+        [Display(GroupName = "回転角", Name = "Z軸", Description = "平面方向、Z軸に対する回転角")]
+        [AnimationSlider("F1", "°", -360, 360)]
+        public Animation RotationZ { get; } = new Animation(0, -36000, 36000);
 
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
@@ -56,6 +72,6 @@ namespace SimpleKerningEffect.Effects
             return new SimpleKerningEffectProcessor(this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [X, Y, Z, Opacity, Zoom, Rotation];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [X, Y, Z, Opacity, Zoom, ZoomX, ZoomY, RotationX, RotationY, RotationZ];
     }
 }

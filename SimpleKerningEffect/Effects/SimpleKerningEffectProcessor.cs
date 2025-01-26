@@ -50,9 +50,13 @@ namespace SimpleKerningEffect.Effects
             var y = item.Y.GetValue(frame, length, fps);
             var z = item.Z.GetValue(frame, length, fps);
             var opacity = item.Opacity.GetValue(frame, length, fps) / 100;
-            var zoom = item.Zoom.GetValue(frame, length, fps) / 100;
-            var rotation = item.Rotation.GetValue(frame, length, fps);
             var invert = item.Invert;
+            var zoom = item.Zoom.GetValue(frame, length, fps) / 100;
+            var zoomX = zoom * item.ZoomX.GetValue(frame, length, fps) / 100;
+            var zoomY = zoom * item.ZoomY.GetValue(frame, length, fps) / 100;
+            var rotationX = item.RotationX.GetValue(frame, length, fps);
+            var rotationY = item.RotationY.GetValue(frame, length, fps);
+            var rotationZ = item.RotationZ.GetValue(frame, length, fps);
 
             return
                 drawDesc with
@@ -62,11 +66,13 @@ namespace SimpleKerningEffect.Effects
                     drawDesc.Draw.Y + (float)y,
                     drawDesc.Draw.Z + (float)z),
                     Opacity = drawDesc.Opacity * opacity,
-                    Zoom = drawDesc.Zoom * (float)zoom,
+                    Zoom = new(
+                    drawDesc.Zoom.X * (float)zoomX,
+                    drawDesc.Zoom.Y * (float)zoomY),
                     Rotation = new(
-                    drawDesc.Rotation.X,
-                    drawDesc.Rotation.Y,
-                    drawDesc.Rotation.Z + (float)rotation),
+                    drawDesc.Rotation.X + (float)rotationX,
+                    drawDesc.Rotation.Y + (float)rotationY,
+                    drawDesc.Rotation.Z + (float)rotationZ),
                     Invert = invert ? !drawDesc.Invert : drawDesc.Invert
                 };
         }
