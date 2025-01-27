@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Immutable;
+using System.ComponentModel.DataAnnotations;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
@@ -62,6 +63,11 @@ namespace SimpleKerningEffect.Effects
         [AnimationSlider("F1", "°", -360, 360)]
         public Animation RotationZ { get; } = new Animation(0, -36000, 36000);
 
+        [Display(GroupName = "簡易カーニング内のエフェクト", Name = "エフェクト", Description = "対象文字にかける映像エフェクト")]
+        [VideoEffectSelector(PropertyEditorSize = PropertyEditorSize.FullWidth)]
+        public ImmutableList<IVideoEffect> Effects { get => effects; set => Set(ref effects, value); }
+        ImmutableList<IVideoEffect> effects = [];
+
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
             return [];
@@ -69,9 +75,9 @@ namespace SimpleKerningEffect.Effects
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
         {
-            return new SimpleKerningEffectProcessor(this);
+            return new SimpleKerningEffectProcessor(this, devices);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [X, Y, Z, Opacity, Zoom, ZoomX, ZoomY, RotationX, RotationY, RotationZ];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [X, Y, Z, Opacity, Zoom, ZoomX, ZoomY, RotationX, RotationY, RotationZ, .. Effects];
     }
 }

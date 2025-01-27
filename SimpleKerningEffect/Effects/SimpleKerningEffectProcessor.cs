@@ -1,5 +1,8 @@
-﻿using System.Text.RegularExpressions;
+﻿using SimpleKerningEffect.ForVideoEffectChain;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Vortice.Direct2D1;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
 namespace SimpleKerningEffect.Effects
@@ -7,13 +10,18 @@ namespace SimpleKerningEffect.Effects
     internal class SimpleKerningEffectProcessor : IVideoEffectProcessor
     {
         readonly SimpleKerningEffect item;
+        VideoEffectChainNode chain;
+        int oldEffListLen;
+        FrameAndLength lastFL = new();
         ID2D1Image? input;
 
-        public ID2D1Image Output => input ?? throw new NullReferenceException(nameof(input) + "is null");
+        public ID2D1Image Output => chain.Output ?? throw new NullReferenceException(nameof(input) + "is null");
 
-        public SimpleKerningEffectProcessor(SimpleKerningEffect item)
+        public SimpleKerningEffectProcessor(SimpleKerningEffect item, IGraphicsDevicesAndContext devices)
         {
             this.item = item;
+            chain = new VideoEffectChainNode(devices, item.Effects, lastFL);
+            oldEffListLen = item.Effects.Count;
         }
 
         public DrawDescription Update(EffectDescription effectDescription)
@@ -46,6 +54,8 @@ namespace SimpleKerningEffect.Effects
             var length = effectDescription.ItemDuration.Frame;
             var fps = effectDescription.FPS;
 
+            FrameAndLength fl = new(frame: frame, length: length);
+
             var x = item.X.GetValue(frame, length, fps);
             var y = item.Y.GetValue(frame, length, fps);
             var z = item.Z.GetValue(frame, length, fps);
@@ -58,36 +68,46 @@ namespace SimpleKerningEffect.Effects
             var rotationY = item.RotationY.GetValue(frame, length, fps);
             var rotationZ = item.RotationZ.GetValue(frame, length, fps);
 
-            return
-                drawDesc with
-                {
-                    Draw = new(
+            DrawDescription newDescription = drawDesc with
+            {
+                Draw = new(
                     drawDesc.Draw.X + (float)x,
                     drawDesc.Draw.Y + (float)y,
                     drawDesc.Draw.Z + (float)z),
-                    Opacity = drawDesc.Opacity * opacity,
-                    Zoom = new(
+                Opacity = drawDesc.Opacity * opacity,
+                Zoom = new(
                     drawDesc.Zoom.X * (float)zoomX,
                     drawDesc.Zoom.Y * (float)zoomY),
-                    Rotation = new(
+                Rotation = new(
                     drawDesc.Rotation.X + (float)rotationX,
                     drawDesc.Rotation.Y + (float)rotationY,
                     drawDesc.Rotation.Z + (float)rotationZ),
-                    Invert = invert ? !drawDesc.Invert : drawDesc.Invert
-                };
+                Invert = invert ? !drawDesc.Invert : drawDesc.Invert
+            };
+
+            if (oldEffListLen > 0 || item.Effects.Count > 0)
+            {
+                oldEffListLen = item.Effects.Count;
+                chain.UpdateChain(item.Effects, fl);
+                newDescription = chain.UpdateOutputAndDescription(input, effectDescription, newDescription);
+            }
+
+            return newDescription;
         }
         public void ClearInput()
         {
             input = null;
+            chain.UpdateChain([], lastFL);
         }
         public void SetInput(ID2D1Image? input)
         {
             this.input = input;
+            chain.UpdateChain([], lastFL);
         }
 
         public void Dispose()
         {
-
+            chain.Dispose();
         }
 
     }
