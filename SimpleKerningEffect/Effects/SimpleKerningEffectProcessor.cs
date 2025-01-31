@@ -10,18 +10,17 @@ namespace SimpleKerningEffect.Effects
     internal class SimpleKerningEffectProcessor : IVideoEffectProcessor
     {
         readonly SimpleKerningEffect item;
-        VideoEffectChainNode chain;
-        int oldEffListLen;
-        FrameAndLength lastFL = new();
-        ID2D1Image? input;
+        readonly VideoEffectChainNode chain;
+        int oldLenOfEffects;
+        //ID2D1Image? input;
 
-        public ID2D1Image Output => chain.Output ?? throw new NullReferenceException(nameof(input) + "is null");
+        public ID2D1Image Output => chain.Output ?? throw new NullReferenceException("output of " + nameof(chain) + "is null");
 
         public SimpleKerningEffectProcessor(SimpleKerningEffect item, IGraphicsDevicesAndContext devices)
         {
             this.item = item;
-            chain = new VideoEffectChainNode(devices, item.Effects, lastFL);
-            oldEffListLen = item.Effects.Count;
+            chain = new VideoEffectChainNode(devices, item.Effects, new());
+            oldLenOfEffects = item.Effects.Count;
         }
 
         public DrawDescription Update(EffectDescription effectDescription)
@@ -48,7 +47,11 @@ namespace SimpleKerningEffect.Effects
                     match = (first <= inputIndex) && (inputIndex <= second) ? true : match;                  
                 }
             }
-            if (!match) return drawDesc;
+            if (!match)
+            {
+                chain.ClearChain();
+                return drawDesc;
+            }
 
             var frame = effectDescription.ItemPosition.Frame;
             var length = effectDescription.ItemDuration.Frame;
@@ -85,24 +88,25 @@ namespace SimpleKerningEffect.Effects
                 Invert = invert ? !drawDesc.Invert : drawDesc.Invert
             };
 
-            if (oldEffListLen > 0 || item.Effects.Count > 0)
+            if (oldLenOfEffects + item.Effects.Count > 0)
             {
-                oldEffListLen = item.Effects.Count;
+                oldLenOfEffects = item.Effects.Count;
                 chain.UpdateChain(item.Effects, fl);
-                newDescription = chain.UpdateOutputAndDescription(input, effectDescription, newDescription);
+                newDescription = chain.UpdateOutputAndDescription(effectDescription, newDescription);
             }
 
             return newDescription;
         }
         public void ClearInput()
         {
-            input = null;
-            chain.UpdateChain([], lastFL);
+            //input = null;
+            chain.ClearInput();
         }
+
         public void SetInput(ID2D1Image? input)
         {
-            this.input = input;
-            chain.UpdateChain([], lastFL);
+            //this.input = input;
+            chain.SetInput(input);
         }
 
         public void Dispose()

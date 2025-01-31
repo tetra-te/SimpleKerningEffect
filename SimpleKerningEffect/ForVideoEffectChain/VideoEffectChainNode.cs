@@ -8,6 +8,7 @@ using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Plugin.Effects;
+using System.Collections.Immutable;
 
 namespace SimpleKerningEffect.ForVideoEffectChain
 {
@@ -17,59 +18,112 @@ namespace SimpleKerningEffect.ForVideoEffectChain
         readonly AffineTransform2D transform;
         readonly ID2D1Bitmap empty;
         readonly DisposeCollector disposer = new();
-        bool wasEmpty;
+        readonly FrameAndLength fl;
+        ID2D1Image? input;
+        bool isEmpty;
         bool disposedValue = false;
-        List<(IVideoEffect effect, IVideoEffectProcessor proseccer, FrameAndLength fl)> Chain = [];
+        List<(IVideoEffect effect, IVideoEffectProcessor processor)> Chain = [];
 
-        public ID2D1Image Output;
+        public ID2D1Image Output => isEmpty ? empty : transform.Output;
 
         public VideoEffectChainNode(IGraphicsDevicesAndContext devices, IEnumerable<IVideoEffect> effects, FrameAndLength fl)
         {
             this.devices = devices;
             transform = new AffineTransform2D(devices.DeviceContext);
             disposer.Collect(transform);
+            disposer.Collect(transform.Output);
 
             empty = devices.DeviceContext.CreateEmptyBitmap();
             disposer.Collect(empty);
 
-            Output = transform.Output;
-            disposer.Collect(Output);
+            isEmpty = false;
 
-            wasEmpty = false;
-
-            Chain = effects.Select(effect => (effect, effect.CreateVideoEffect(devices), new FrameAndLength(fl))).ToList();
+            Chain = effects.Select(effect => (effect, effect.CreateVideoEffect(devices))).ToList();
+            
+            this.fl = new(fl);
         }
 
-        public void UpdateChain(IEnumerable<IVideoEffect> effects, FrameAndLength fl)
+        public void UpdateChain(ImmutableList<IVideoEffect> effects, FrameAndLength fl)
         {
-            var disposedIndex = from e_ep in Chain
-                                where !effects.Contains(e_ep.effect)
-                                select Chain.IndexOf(e_ep) into i
+            var disposedIndex = from tuple in Chain
+                                where !effects.Contains(tuple.effect)
+                                select Chain.IndexOf(tuple) into i
                                 orderby i descending
                                 select i;
             foreach (int index in disposedIndex)
             {
-                (IVideoEffect effect, IVideoEffectProcessor processor, FrameAndLength fl) tuple = Chain[index];
-                tuple.processor.ClearInput();
-                tuple.processor.Dispose();
+                IVideoEffectProcessor processor = Chain[index].processor;
+                processor.ClearInput();
+                processor.Dispose();
                 Chain.RemoveAt(index);
             }
 
             List<IVideoEffect> keeped = Chain.Select((e_ep) => e_ep.effect).ToList();
-            List<(IVideoEffect, IVideoEffectProcessor, FrameAndLength)> newChain = new(effects.Count());
+            List<(IVideoEffect effect, IVideoEffectProcessor processor)> newChain = new(effects.Count);
             foreach (var effect in effects)
             {
                 int index = keeped.IndexOf(effect);
-                newChain.Add(index < 0 ? (effect, effect.CreateVideoEffect(devices), fl) : Chain[index]);
+                newChain.Add(index < 0 ? (effect, effect.CreateVideoEffect(devices)) : Chain[index]);
             }
 
             Chain = newChain;
+            this.fl.CopyFrom(fl);
         }
 
-        public DrawDescription UpdateOutputAndDescription(ID2D1Image? input, TimelineSourceDescription timelineSourceDescription, DrawDescription drawDescription)
+        public void SetInput(ID2D1Image? input)
         {
-            TimelineItemSourceDescription timeLineItemSourceDescription;
-            DrawDescription result = new(
+            this.input = input;
+            if (input == null)
+            {
+                isEmpty = true;
+                return;
+            }
+            else
+            {
+                if (Chain.Count > 0)
+                {
+                    Chain.First().processor.SetInput(input);
+                    transform.SetInput(0, Chain.Last().processor.Output, true);
+                }
+                else
+                {
+                    transform.SetInput(0, input, true);
+                }
+                isEmpty = false;
+            }
+        }
+
+        public void ClearChain()
+        {
+            foreach (var (_, processor) in Chain)
+            {
+                processor.ClearInput();
+                processor.Dispose();
+            }
+            Chain.Clear();
+            transform.SetInput(0, input, true);
+        }
+
+        public void ClearInput()
+        {
+            transform.SetInput(0, null, true);
+            foreach (var (_, processor) in Chain)
+            {
+                processor.ClearInput();
+                processor.Dispose();
+            }
+            Chain.Clear();
+        }
+
+        public DrawDescription UpdateOutputAndDescription(TimelineSourceDescription timelineSourceDescription, DrawDescription drawDescription)
+        {
+            if (input == null)
+            {
+                isEmpty = true;
+                return drawDescription;
+            }
+
+            DrawDescription desc = new(
                 drawDescription.Draw,
                 drawDescription.CenterPoint,
                 drawDescription.Zoom,
@@ -81,45 +135,25 @@ namespace SimpleKerningEffect.ForVideoEffectChain
                 drawDescription.Controllers
                 );
 
-            if (input == null)
+            ID2D1Image? image = input;
+            foreach (var (effect, processor) in Chain)
             {
-                if (!wasEmpty)
+                if (effect.IsEnabled)
                 {
-                    Output = empty;
-                    wasEmpty = true;
-                }
-                return result;
-            }
-
-            ID2D1Image? output = input;
-            foreach (var tuple in Chain)
-            {
-                if (tuple.effect.IsEnabled)
-                {
-                    IVideoEffectProcessor item = tuple.proseccer;
-                    FrameAndLength fl = tuple.fl;
-                    item.SetInput(output);
-                    timeLineItemSourceDescription = new(timelineSourceDescription, fl.Frame, fl.Length, 0);
-                    EffectDescription effectDescription = new(timeLineItemSourceDescription, result, 0);
-                    result = item.Update(effectDescription);
-
-                    output = item.Output;
+                    IVideoEffectProcessor item = processor;
+                    item.SetInput(image);
+                    TimelineItemSourceDescription timeLineItemSourceDescription
+                        = new(timelineSourceDescription, fl.Frame, fl.Length, 0);
+                    EffectDescription effectDescription = new(timeLineItemSourceDescription, desc, 0);
+                    desc = item.Update(effectDescription);
+                    image = item.Output;
                 }
             }
-            transform.SetInput(0, output, true);
 
-            if (wasEmpty)
-            {
-                Output = transform.Output;
-                wasEmpty = false;
-            }
+            transform.SetInput(0, image, true);
+            isEmpty = false;
 
-            return result;
-        }
-
-        void ClearInput()
-        {
-
+            return desc;
         }
 
         void ClearEffectChain()
@@ -133,8 +167,8 @@ namespace SimpleKerningEffect.ForVideoEffectChain
             {
                 Chain.ForEach(i =>
                 {
-                    i.proseccer.ClearInput();
-                    i.proseccer.Dispose();
+                    i.processor.ClearInput();
+                    i.processor.Dispose();
                 });
                 ClearEffectChain();
                 disposer.Dispose();
