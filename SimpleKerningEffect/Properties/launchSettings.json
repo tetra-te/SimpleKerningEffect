@@ -2,7 +2,7 @@
   "profiles": {
     "プロファイル 1": {
       "commandName": "Executable",
-      "executablePath": "C:\\Users\\shinm\\Desktop\\ゆっくりムービーメーカー４\\YukkuriMovieMaker_v4\\YukkuriMovieMaker.exe"
+      "executablePath": "C:\\YMM4\\YukkuriMovieMaker.exe"
     }
   }
 }
