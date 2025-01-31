@@ -17,26 +17,23 @@ namespace SimpleKerningEffect.ForVideoEffectChain
         readonly IGraphicsDevicesAndContext devices;
         readonly AffineTransform2D transform;
         readonly ID2D1Bitmap empty;
-        readonly DisposeCollector disposer = new();
         readonly FrameAndLength fl;
         ID2D1Image? input;
         bool isEmpty;
-        bool disposedValue = false;
         List<(IVideoEffect effect, IVideoEffectProcessor processor)> Chain = [];
 
-        public ID2D1Image Output => isEmpty ? empty : transform.Output;
+        ID2D1Image output;
+        public ID2D1Image Output => isEmpty ? empty : output;
 
         public VideoEffectChainNode(IGraphicsDevicesAndContext devices, IEnumerable<IVideoEffect> effects, FrameAndLength fl)
         {
             this.devices = devices;
             transform = new AffineTransform2D(devices.DeviceContext);
-            disposer.Collect(transform);
-            disposer.Collect(transform.Output);
+            output = transform.Output;
 
             empty = devices.DeviceContext.CreateEmptyBitmap();
-            disposer.Collect(empty);
-
-            isEmpty = false;
+            
+            isEmpty = true;
 
             Chain = effects.Select(effect => (effect, effect.CreateVideoEffect(devices))).ToList();
             
@@ -106,6 +103,7 @@ namespace SimpleKerningEffect.ForVideoEffectChain
 
         public void ClearInput()
         {
+            input = null;
             transform.SetInput(0, null, true);
             foreach (var (_, processor) in Chain)
             {
@@ -152,29 +150,21 @@ namespace SimpleKerningEffect.ForVideoEffectChain
 
             transform.SetInput(0, image, true);
             isEmpty = false;
-
             return desc;
-        }
-
-        void ClearEffectChain()
-        {
-            transform.SetInput(0, null, true);
         }
 
         public void Dispose()
         {
-            if (!disposedValue)
+            transform.SetInput(0, null, true);
+            transform.Dispose();
+            empty.Dispose();
+            output.Dispose();
+
+            Chain.ForEach(i =>
             {
-                Chain.ForEach(i =>
-                {
-                    i.processor.ClearInput();
-                    i.processor.Dispose();
-                });
-                ClearEffectChain();
-                disposer.Dispose();
-                GC.SuppressFinalize(this);
-                disposedValue = true;
-            }
+                i.processor.ClearInput();
+                i.processor.Dispose();
+            });
         }
     }
 }
