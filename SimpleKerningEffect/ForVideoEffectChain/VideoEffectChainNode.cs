@@ -17,7 +17,7 @@ namespace SimpleKerningEffect.ForVideoEffectChain
         readonly IGraphicsDevicesAndContext devices;
         readonly AffineTransform2D transform;
         readonly ID2D1Bitmap empty;
-        readonly FrameAndLength fl;
+        readonly FrameAndLength fl = new();
         ID2D1Image? input;
         bool isEmpty;
         List<(IVideoEffect effect, IVideoEffectProcessor processor)> Chain = [];
@@ -25,7 +25,7 @@ namespace SimpleKerningEffect.ForVideoEffectChain
         ID2D1Image output;
         public ID2D1Image Output => isEmpty ? empty : output;
 
-        public VideoEffectChainNode(IGraphicsDevicesAndContext devices, IEnumerable<IVideoEffect> effects, FrameAndLength fl)
+        public VideoEffectChainNode(IGraphicsDevicesAndContext devices)
         {
             this.devices = devices;
             transform = new AffineTransform2D(devices.DeviceContext);
@@ -34,13 +34,9 @@ namespace SimpleKerningEffect.ForVideoEffectChain
             empty = devices.DeviceContext.CreateEmptyBitmap();
             
             isEmpty = true;
-
-            Chain = effects.Select(effect => (effect, effect.CreateVideoEffect(devices))).ToList();
-            
-            this.fl = new(fl);
         }
 
-        public void UpdateChain(ImmutableList<IVideoEffect> effects, FrameAndLength fl)
+        public void UpdateChain(ImmutableList<IVideoEffect> effects)
         {
             var disposedIndex = from tuple in Chain
                                 where !effects.Contains(tuple.effect)
@@ -64,7 +60,6 @@ namespace SimpleKerningEffect.ForVideoEffectChain
             }
 
             Chain = newChain;
-            this.fl.CopyFrom(fl);
         }
 
         public void SetInput(ID2D1Image? input)
@@ -113,7 +108,7 @@ namespace SimpleKerningEffect.ForVideoEffectChain
             Chain.Clear();
         }
 
-        public DrawDescription UpdateOutputAndDescription(TimelineSourceDescription timelineSourceDescription, DrawDescription drawDescription)
+        public DrawDescription UpdateOutputAndDescription(TimelineItemSourceDescription timelineSourceDescription, DrawDescription drawDescription)
         {
             if (input == null)
             {
@@ -121,6 +116,7 @@ namespace SimpleKerningEffect.ForVideoEffectChain
                 return drawDescription;
             }
 
+            fl.UpdateFrom(timelineSourceDescription);
             DrawDescription desc = new(
                 drawDescription.Draw,
                 drawDescription.CenterPoint,

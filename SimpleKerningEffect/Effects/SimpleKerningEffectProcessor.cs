@@ -19,7 +19,7 @@ namespace SimpleKerningEffect.Effects
         public SimpleKerningEffectProcessor(SimpleKerningEffect item, IGraphicsDevicesAndContext devices)
         {
             this.item = item;
-            chain = new VideoEffectChainNode(devices, item.Effects, new());
+            chain = new VideoEffectChainNode(devices);
             oldLenOfEffects = item.Effects.Count;
         }
 
@@ -35,7 +35,11 @@ namespace SimpleKerningEffect.Effects
             {
                 var numerics = Regex.IsMatch(part[i], @"^[0-9]{1,9}$");
                 var hyphen = Regex.IsMatch(part[i], @"^[0-9]{1,9}-[0-9]{1,9}$");
-                if (!numerics && !hyphen) return drawDesc;
+                if (!numerics && !hyphen)
+                {
+                    chain.ClearChain();
+                    return drawDesc;
+                }
                 if (numerics)
                     match = (int.Parse(part[i]) == inputIndex) ? true : match;
                 if (hyphen)
@@ -43,7 +47,11 @@ namespace SimpleKerningEffect.Effects
                     var piece = part[i].Split("-");
                     var first = int.Parse(piece[0]);
                     var second = int.Parse(piece[1]);
-                    if (first > second) return drawDesc;
+                    if (first > second)
+                    {
+                        chain.ClearChain();
+                        return drawDesc;
+                    }
                     match = (first <= inputIndex) && (inputIndex <= second) ? true : match;                  
                 }
             }
@@ -56,8 +64,6 @@ namespace SimpleKerningEffect.Effects
             var frame = effectDescription.ItemPosition.Frame;
             var length = effectDescription.ItemDuration.Frame;
             var fps = effectDescription.FPS;
-
-            FrameAndLength fl = new(frame: frame, length: length);
 
             var x = item.X.GetValue(frame, length, fps);
             var y = item.Y.GetValue(frame, length, fps);
@@ -85,7 +91,7 @@ namespace SimpleKerningEffect.Effects
             if (oldLenOfEffects + item.Effects.Count > 0)
             {
                 oldLenOfEffects = item.Effects.Count;
-                chain.UpdateChain(item.Effects, fl);
+                chain.UpdateChain(item.Effects);
                 newDescription = chain.UpdateOutputAndDescription(effectDescription, newDescription);
             }
 
@@ -101,6 +107,7 @@ namespace SimpleKerningEffect.Effects
         {
             //this.input = input;
             chain.SetInput(input);
+            chain.UpdateChain(item.Effects);
         }
 
         public void Dispose()

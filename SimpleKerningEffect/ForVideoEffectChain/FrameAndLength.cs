@@ -36,5 +36,11 @@ namespace SimpleKerningEffect.ForVideoEffectChain
             Frame = origin.Frame;
             Length = origin.Length;
         }
+
+        public void UpdateFrom(TimelineItemSourceDescription description)
+        {
+            Frame = description.ItemPosition.Frame;
+            Length = description.ItemDuration.Frame;
+        }
     }
 }
