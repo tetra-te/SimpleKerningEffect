@@ -1,5 +1,8 @@
-﻿using System.Text.RegularExpressions;
+﻿using SimpleKerningEffect.ForVideoEffectChain;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Vortice.Direct2D1;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 
 namespace SimpleKerningEffect.Effects
@@ -7,13 +10,17 @@ namespace SimpleKerningEffect.Effects
     internal class SimpleKerningEffectProcessor : IVideoEffectProcessor
     {
         readonly SimpleKerningEffect item;
-        ID2D1Image? input;
+        readonly VideoEffectChainNode chain;
+        int oldLenOfEffects;
+        //ID2D1Image? input;
 
-        public ID2D1Image Output => input ?? throw new NullReferenceException(nameof(input) + "is null");
+        public ID2D1Image Output => chain.Output ?? throw new NullReferenceException("output of " + nameof(chain) + "is null");
 
-        public SimpleKerningEffectProcessor(SimpleKerningEffect item)
+        public SimpleKerningEffectProcessor(SimpleKerningEffect item, IGraphicsDevicesAndContext devices)
         {
             this.item = item;
+            chain = new VideoEffectChainNode(devices, item.Effects, new());
+            oldLenOfEffects = item.Effects.Count;
         }
 
         public DrawDescription Update(EffectDescription effectDescription)
@@ -40,11 +47,17 @@ namespace SimpleKerningEffect.Effects
                     match = (first <= inputIndex) && (inputIndex <= second) ? true : match;                  
                 }
             }
-            if (!match) return drawDesc;
+            if (!match)
+            {
+                chain.ClearChain();
+                return drawDesc;
+            }
 
             var frame = effectDescription.ItemPosition.Frame;
             var length = effectDescription.ItemDuration.Frame;
             var fps = effectDescription.FPS;
+
+            FrameAndLength fl = new(frame: frame, length: length);
 
             var x = item.X.GetValue(frame, length, fps);
             var y = item.Y.GetValue(frame, length, fps);
@@ -58,36 +71,47 @@ namespace SimpleKerningEffect.Effects
             var rotationY = item.RotationY.GetValue(frame, length, fps);
             var rotationZ = item.RotationZ.GetValue(frame, length, fps);
 
-            return
-                drawDesc with
-                {
-                    Draw = new(
+            DrawDescription newDescription = drawDesc with
+            {
+                Draw = new(
                     drawDesc.Draw.X + (float)x,
                     drawDesc.Draw.Y + (float)y,
                     drawDesc.Draw.Z + (float)z),
-                    Opacity = drawDesc.Opacity * opacity,
-                    Zoom = new(
+                Opacity = drawDesc.Opacity * opacity,
+                Zoom = new(
                     drawDesc.Zoom.X * (float)zoomX,
                     drawDesc.Zoom.Y * (float)zoomY),
-                    Rotation = new(
+                Rotation = new(
                     drawDesc.Rotation.X + (float)rotationX,
                     drawDesc.Rotation.Y + (float)rotationY,
                     drawDesc.Rotation.Z + (float)rotationZ),
-                    Invert = invert ? !drawDesc.Invert : drawDesc.Invert
-                };
+                Invert = invert ? !drawDesc.Invert : drawDesc.Invert
+            };
+
+            if (oldLenOfEffects + item.Effects.Count > 0)
+            {
+                oldLenOfEffects = item.Effects.Count;
+                chain.UpdateChain(item.Effects, fl);
+                newDescription = chain.UpdateOutputAndDescription(effectDescription, newDescription);
+            }
+
+            return newDescription;
         }
         public void ClearInput()
         {
-            input = null;
+            //input = null;
+            chain.ClearInput();
         }
+
         public void SetInput(ID2D1Image? input)
         {
-            this.input = input;
+            //this.input = input;
+            chain.SetInput(input);
         }
 
         public void Dispose()
         {
-
+            chain.Dispose();
         }
 
     }
