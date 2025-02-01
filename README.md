@@ -48,7 +48,7 @@
 2. YMM4を終了する。
 3. `SimpleKerningEffect`という名前のフォルダを削除する。  
 ## 謝辞
-文字ごとに映像エフェクトを付与する機能は[sinβ](https://github.com/sinBetaKun)氏による実装です。  
+文字ごとに映像エフェクトを付与する機能は[sinβ](https://x.com/sinBetaKun)(sinBetaKun)氏による実装です。  
 これによりプラグインの自由度が大幅に向上しました。  
 この場をお借りして、感謝申し上げます。
 ## ライセンス
