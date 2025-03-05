@@ -138,7 +138,7 @@ namespace SimpleKerningEffect.ForVideoEffectChain
                     item.SetInput(image);
                     TimelineItemSourceDescription timeLineItemSourceDescription
                         = new(timelineSourceDescription, fl.Frame, fl.Length, 0);
-                    EffectDescription effectDescription = new(timeLineItemSourceDescription, desc, 0);
+                    EffectDescription effectDescription = new(timeLineItemSourceDescription, desc, 0, 1);
                     desc = item.Update(effectDescription);
                     image = item.Output;
                 }
