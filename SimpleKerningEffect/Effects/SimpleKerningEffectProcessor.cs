@@ -27,32 +27,49 @@ namespace SimpleKerningEffect.Effects
         {
             var drawDesc = effectDescription.DrawDescription;
             var inputIndex = effectDescription.InputIndex + 1;
-            
+            var inputCount = effectDescription.InputCount;
+
             var index = item.Index.Replace(" ", "");
             var part = index.Split(",");
             var match = false;
+
+            int InvertCaret(string input)
+            {
+                if (Regex.IsMatch(input, @"^\^[0-9]{1,9}"))
+                {
+                    var trimmed = input[1..];
+                    return inputCount - int.Parse(trimmed) + 1;
+                }
+                else
+                {
+                    return int.Parse(input);
+                }
+            }
+
             for (int i = 0; i < part.Length; i++)
             {
-                var numerics = Regex.IsMatch(part[i], @"^[0-9]{1,9}$");
-                var hyphen = Regex.IsMatch(part[i], @"^[0-9]{1,9}-[0-9]{1,9}$");
+                var numerics = Regex.IsMatch(part[i], @"^(\^|)[0-9]{1,9}$");
+                var hyphen = Regex.IsMatch(part[i], @"^(\^|)[0-9]{1,9}-(\^|)[0-9]{1,9}$");
+
                 if (!numerics && !hyphen)
                 {
                     chain.ClearChain();
                     return drawDesc;
                 }
                 if (numerics)
-                    match = (int.Parse(part[i]) == inputIndex) ? true : match;
+                {
+                    match = (InvertCaret(part[i]) == inputIndex) ? true : match;
+                }
                 if (hyphen)
                 {
                     var piece = part[i].Split("-");
-                    var first = int.Parse(piece[0]);
-                    var second = int.Parse(piece[1]);
+                    var first = InvertCaret(piece[0]);
+                    var second = InvertCaret(piece[1]);
                     if (first > second)
                     {
-                        chain.ClearChain();
-                        return drawDesc;
+                        (first, second) = (second, first);
                     }
-                    match = (first <= inputIndex) && (inputIndex <= second) ? true : match;                  
+                    match = (first <= inputIndex) && (inputIndex <= second) ? true : match;
                 }
             }
             if (!match)
