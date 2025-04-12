@@ -1,9 +1,8 @@
-﻿using SimpleKerningEffect.ForVideoEffectChain;
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
+﻿using System.Text.RegularExpressions;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
+using SimpleKerningEffect.ForVideoEffectChain;
 
 namespace SimpleKerningEffect.Effects
 {
@@ -50,8 +49,10 @@ namespace SimpleKerningEffect.Effects
             {
                 var numerics = Regex.IsMatch(part[i], @"^(\^|)[0-9]{1,9}$");
                 var hyphen = Regex.IsMatch(part[i], @"^(\^|)[0-9]{1,9}-(\^|)[0-9]{1,9}$");
+                var odd = Regex.IsMatch(part[i], @"^(o|O)$");
+                var even = Regex.IsMatch(part[i], @"^(e|E)$");
 
-                if (!numerics && !hyphen)
+                if (!numerics && !hyphen && !odd && !even)
                 {
                     chain.ClearChain();
                     return drawDesc;
@@ -70,6 +71,14 @@ namespace SimpleKerningEffect.Effects
                         (first, second) = (second, first);
                     }
                     match = (first <= inputIndex) && (inputIndex <= second) ? true : match;
+                }
+                if (odd)
+                {
+                    match = (inputIndex % 2 == 1) ? true : match;
+                }
+                if (even)
+                {
+                    match = (inputIndex % 2 == 0) ? true : match;
                 }
             }
             if (!match)

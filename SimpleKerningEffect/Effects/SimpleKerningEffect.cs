@@ -13,7 +13,7 @@ namespace SimpleKerningEffect.Effects
     {
         public override string Label => "簡易カーニング";
 
-        [Display(GroupName = "簡易カーニング\r\n対象の文字位置を数字で指定します\r\n,で複数指定、- で範囲指定、^ で逆順指定", Name = "文字位置", Description = "何文字目を対象にするか設定します\r\n例：1,3,5-10")]
+        [Display(GroupName = "対象の文字位置を数字で指定します\r\n,で複数指定　-で範囲指定　^で末尾から指定\r\noで奇数　eで偶数", Name = "文字位置", Description = "何文字目を対象にするか設定します\r\n例：1,3,5-10")]
         [TextEditor(AcceptsReturn = true)]
         public string Index { get => index; set => Set(ref index, value); }
         string index = string.Empty;
