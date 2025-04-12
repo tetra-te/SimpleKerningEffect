@@ -16,6 +16,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Lib.Harmony" Version="2.3.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="YukkuriMovieMaker">
+			<HintPath>$(YMM4DirPath)YukkuriMovieMaker.dll</HintPath>
+		</Reference>
 		<Reference Include="YukkuriMovieMaker.Controls">
 			<HintPath>$(YMM4DirPath)YukkuriMovieMaker.Controls.dll</HintPath>
 		</Reference>
