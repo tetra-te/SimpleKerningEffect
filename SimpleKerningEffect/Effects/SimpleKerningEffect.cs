@@ -13,10 +13,60 @@ namespace SimpleKerningEffect.Effects
     {
         public override string Label => "簡易カーニング";
 
-        [Display(GroupName = "対象の文字位置を数字で指定します\r\n,で複数指定　-で範囲指定　^で末尾から指定\r\noで奇数　eで偶数", Name = "文字位置", Description = "何文字目を対象にするか設定します\r\n例：1,3,5-10")]
+        [Display(GroupName = "カーニング対象\r\n,で複数指定　-で範囲指定　^で末尾から指定", Name = "文字位置", Description = "何文字目を対象にするか設定します\r\n例：1,3,5-10")]
         [TextEditor(AcceptsReturn = true)]
         public string Index { get => index; set => Set(ref index, value); }
         string index = string.Empty;
+
+        [Display(GroupName = "カーニング対象\r\n,で複数指定　-で範囲指定　^で末尾から指定", Name = "行位置", Description = "何行目を対象にするか設定します\r\n例：1,3,5-10")]
+        [TextEditor(AcceptsReturn = true)]
+        public string Line { get => line; set => Set(ref line, value); }
+        string line = string.Empty;
+
+        [Display(GroupName = "カーニング対象", Name = "奇数文字目", Description = "奇数文字目の文字を対象に含める")]
+        [ToggleSlider]
+        public bool Odd { get => odd; set => Set(ref odd, value); }
+        bool odd = false;
+
+        [Display(GroupName = "カーニング対象", Name = "偶数文字目", Description = "偶数文字目の文字を対象に含める")]
+        [ToggleSlider]
+        public bool Even { get => even; set => Set(ref even, value); }
+        bool even = false;
+
+        [Display(GroupName = "カーニング対象", Name = "ひらがな", Description = "ひらがなを対象に含める")]
+        [ToggleSlider]
+        public bool Hiragana { get => hiragana; set => Set(ref hiragana, value); }
+        bool hiragana = false;
+
+        [Display(GroupName = "カーニング対象", Name = "カタカナ", Description = "カタカナを対象に含める")]
+        [ToggleSlider]
+        public bool Katakana { get => katakana; set => Set(ref katakana, value); }
+        bool katakana = false;
+
+        [Display(GroupName = "カーニング対象", Name = "漢字", Description = "漢字を対象に含める")]
+        [ToggleSlider]
+        public bool Kanji { get => kanji; set => Set(ref kanji, value); }
+        bool kanji = false;
+
+        [Display(GroupName = "カーニング対象", Name = "数字", Description = "数字を対象に含める")]
+        [ToggleSlider]
+        public bool Number { get => number; set => Set(ref number, value); }
+        bool number = false;
+
+        [Display(GroupName = "カーニング対象", Name = "アルファベット", Description = "アルファベットを対象に含める")]
+        [ToggleSlider]
+        public bool Alphabet { get => alphabet; set => Set(ref alphabet, value); }
+        bool alphabet = false;
+
+        [Display(GroupName = "カーニング対象", Name = "対象文字", Description = "対象に含めるテキストを指定します\r\nカンマ区切り可能")]
+        [TextEditor(AcceptsReturn = true)]
+        public string Texts { get => texts; set => Set(ref texts, value); }
+        string texts = string.Empty;
+
+        [Display(GroupName = "カーニング対象", Name = "正規表現", Description = "正規表現にマッチする部分を対象に含めます\r\n記述内容によってはパフォーマンスに問題が発生することがあります")]
+        [TextEditor(AcceptsReturn = true)]
+        public string Regex { get => regex; set => Set(ref regex, value); }
+        string regex = string.Empty;
 
         [Display(GroupName = "描画", Name = "X", Description = "描画位置（横方向）")]
         [AnimationSlider("F1", "px", -500, 500)]
