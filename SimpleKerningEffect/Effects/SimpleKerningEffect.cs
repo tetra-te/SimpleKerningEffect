@@ -13,12 +13,12 @@ namespace SimpleKerningEffect.Effects
     {
         public override string Label => "簡易カーニング";
 
-        [Display(GroupName = "カーニング対象\r\n,で複数指定　-で範囲指定　^で末尾から指定", Name = "文字位置", Description = "何文字目を対象にするか設定します\r\n例：1,3,5-10")]
+        [Display(GroupName = "カーニング対象\r\n,で複数指定　-で範囲指定　^で末尾から指定", Name = "文字位置", Description = "何文字目を対象にするか設定します\r\n例：\r\n1,3,5-10\r\n10-^3")]
         [TextEditor(AcceptsReturn = true)]
         public string Index { get => index; set => Set(ref index, value); }
         string index = string.Empty;
 
-        [Display(GroupName = "カーニング対象\r\n,で複数指定　-で範囲指定　^で末尾から指定", Name = "行位置", Description = "何行目を対象にするか設定します\r\n例：1,3,5-10")]
+        [Display(GroupName = "カーニング対象\r\n,で複数指定　-で範囲指定　^で末尾から指定", Name = "行位置", Description = "何行目を対象にするか設定します\r\n例：\r\n1,3,5-10\r\n10-^3")]
         [TextEditor(AcceptsReturn = true)]
         public string Line { get => line; set => Set(ref line, value); }
         string line = string.Empty;

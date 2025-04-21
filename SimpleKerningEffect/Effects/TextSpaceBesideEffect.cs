@@ -8,6 +8,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 
 namespace SimpleKerningEffect.Effects
 {
+    [Obsolete("代わりにTextSpaceEffectを使用します")]
     [VideoEffect("文字間隔調整（横書）", ["テキスト"], ["kerning", "文字", "テキスト", "text", "プラグイン", "plugin"], isAviUtlSupported:false, isEffectItemSupported:false)]
     internal class TextSpaceBesideEffect : VideoEffectBase
     {
