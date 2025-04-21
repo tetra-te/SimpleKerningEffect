@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Project.Items;
 
 namespace SimpleKerningEffect.Patch
 {
@@ -14,8 +15,11 @@ namespace SimpleKerningEffect.Patch
             var textItemType = item.GetType();
             var textProp = AccessTools.Property(textItemType, "Text");
             var text = textProp.GetValue(item);
+            var basePointProp = AccessTools.Property(textItemType, "BasePoint");
+            var basePoint = basePointProp.GetValue(item);
 
             Storage.Texts[(desc.SceneId, desc.Layer)] = (string)text;
+            Storage.BasePoints[(desc.SceneId, desc.Layer)] = (BasePoint)basePoint;
         }
     }
 }

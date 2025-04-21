@@ -5,7 +5,7 @@ namespace SimpleKerningEffect.Patch
 {
     public class Main : IPlugin
     {
-        public string Name => "簡易カーニング（テキスト取得パッチ）";
+        public string Name => "簡易カーニング（テキスト情報取得パッチ）";
 
         public Main()
         {
