@@ -13,6 +13,7 @@ namespace SimpleKerningEffect.Effects
         int oldLenOfEffects;
 
         public ID2D1Image Output => chain.Output ?? throw new NullReferenceException("output of " + nameof(chain) + "is null");
+        static readonly string[] separator = [",", "\r\n"];
 
         public SimpleKerningEffectProcessor(SimpleKerningEffect item, IGraphicsDevicesAndContext devices)
         {
@@ -98,29 +99,26 @@ namespace SimpleKerningEffect.Effects
             }
             if (!match)
             {
-                var texts = item.Texts.Split(",");
+                var texts = item.Texts.Split(separator, StringSplitOptions.None);
 
-                if (!texts.Contains("")) //無限ループ防止
+                var shouldBreak = false;
+
+                for (int i = 0; i < texts.Length; i++)
                 {
-                    var shouldBreak = false;
+                    int index = 0;
 
-                    for (int i = 0; i < texts.Length; i++)
+                    while ((index = inputTextOneLine.IndexOf(texts[i], index)) != -1 && texts[i] != "")
                     {
-                        int index = 0;
-
-                        while ((index = inputTextOneLine.IndexOf(texts[i], index)) != -1)
+                        if ((index <= inputIndex - 1) && (inputIndex <= index + texts[i].Length))
                         {
-                            if ((index <= inputIndex - 1) && (inputIndex <= index + texts[i].Length))
-                            {
-                                match = true;
-                                shouldBreak = true;
-                                break;
-                            }
-                            index += texts[i].Length;
+                            match = true;
+                            shouldBreak = true;
+                            break;
                         }
-
-                        if (shouldBreak) break;
+                        index += texts[i].Length;
                     }
+
+                    if (shouldBreak) break;
                 }
             }
             if (!match)
@@ -207,14 +205,14 @@ namespace SimpleKerningEffect.Effects
             bool match = false;
 
             numbersExpression = numbersExpression.Replace(" ", "");
-            var part = numbersExpression.Split(",");
+            var part = numbersExpression.Split(separator, StringSplitOptions.None);
 
             for (int i = 0; i < part.Length; i++)
             {
                 var numerics = Regex.IsMatch(part[i], @"^(\^|)[0-9]{1,9}$");
                 var hyphen = Regex.IsMatch(part[i], @"^(\^|)[0-9]{1,9}-(\^|)[0-9]{1,9}$");
 
-                if (!numerics && !hyphen)
+                if (!numerics && !hyphen && part[i] != "")
                 {
                     match = false;
                     break;
