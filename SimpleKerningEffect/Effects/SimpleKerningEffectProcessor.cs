@@ -26,16 +26,16 @@ namespace SimpleKerningEffect.Effects
         {
             var drawDesc = effectDescription.DrawDescription;
             var inputText = Storage.GetText(effectDescription);
-            if (inputText == "")
-            {
-                chain.ClearChain();
-                return drawDesc;
-            }
+            var hasInputText = inputText != "";
             
             var inputIndex = effectDescription.InputIndex + 1;
             var inputCount = effectDescription.InputCount;
             var inputTextOneLine = inputText.Replace("\r\n", "");
-            var inputChar = inputTextOneLine[inputIndex - 1];
+            
+            char inputChar = 'a';
+
+            if (hasInputText)
+                inputChar = inputTextOneLine[inputIndex - 1];
 
             var match = false;
 
@@ -47,29 +47,29 @@ namespace SimpleKerningEffect.Effects
             {
                 match = (inputIndex % 2 == 0);
             }
-            if (item.Hiragana && !match)
+            if (item.Hiragana && !match && hasInputText)
             {
                 match = ('\u3041' <= inputChar && inputChar <= '\u3096') ||
                         ('\u309D' <= inputChar && inputChar <= '\u309F') ||
                         (inputChar == 'ー');
             }
-            if (item.Katakana && !match)
+            if (item.Katakana && !match && hasInputText)
             {
                 match = ('\u30A1' <= inputChar && inputChar <= '\u30FA') ||
                         ('\u30FD' <= inputChar && inputChar <= '\u30FF') ||
                         (inputChar == 'ー');
             }
-            if (item.Kanji && !match)
+            if (item.Kanji && !match && hasInputText)
             {
                 match = ('\u4E00' <= inputChar && inputChar <= '\u9FFF') ||
                         ('\u3400' <= inputChar && inputChar <= '\u4DBF') ||
                         ('\uF900' <= inputChar && inputChar <= '\uFAFF');
             }
-            if (item.Number && !match)
+            if (item.Number && !match && hasInputText)
             {
                 match = char.IsDigit(inputChar);
             }
-            if (item.Alphabet && !match)
+            if (item.Alphabet && !match && hasInputText)
             {
                 match = ('a' <= inputChar && inputChar <= 'z') ||
                         ('A' <= inputChar && inputChar <= 'Z');
@@ -78,7 +78,7 @@ namespace SimpleKerningEffect.Effects
             {
                 match = ContainsNum(item.Index, inputIndex, inputCount);
             }
-            if (!match)
+            if (!match && hasInputText)
             {
                 var inputLine = inputText.Split("\r\n");
                 var lineCount = inputLine.Length;
@@ -97,7 +97,7 @@ namespace SimpleKerningEffect.Effects
 
                 match = ContainsNum(item.Line, currentLine, lineCount);
             }
-            if (!match)
+            if (!match && hasInputText)
             {
                 var texts = item.Texts.Split(separator, StringSplitOptions.None);
 
@@ -122,7 +122,7 @@ namespace SimpleKerningEffect.Effects
                 }
             }
             var pattern = item.Regex;
-            if (!match && pattern != "")
+            if (!match && pattern != "" && hasInputText)
             {
                 try
                 {
