@@ -121,27 +121,23 @@ namespace SimpleKerningEffect.Effects
                     if (shouldBreak) break;
                 }
             }
-            if (!match)
+            var pattern = item.Regex;
+            if (!match && pattern != "")
             {
-                var pattern = item.Regex;
-
-                if (pattern != "")
+                try
                 {
-                    try
-                    {
-                        var matches = Regex.Matches(inputTextOneLine, pattern);
+                    var matches = Regex.Matches(inputTextOneLine, pattern);
 
-                        foreach (Match matchRegex in matches)
+                    foreach (Match matchRegex in matches)
+                    {
+                        if ((matchRegex.Index <= inputIndex - 1) && (inputIndex <= matchRegex.Index + matchRegex.Length))
                         {
-                            if ((matchRegex.Index <= inputIndex - 1) && (inputIndex <= matchRegex.Index + matchRegex.Length))
-                            {
-                                match = true;
-                                break;
-                            }
+                            match = true;
+                            break;
                         }
                     }
-                    catch { }
                 }
+                catch { }
             }
             if (!match)
             {
