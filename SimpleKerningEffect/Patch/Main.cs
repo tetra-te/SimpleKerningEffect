@@ -9,7 +9,7 @@ namespace SimpleKerningEffect.Patch
 
         public Main()
         {
-            var harmony = new Harmony("SimpleKerningEffect.TextAcquisitionPatch");
+            var harmony = new Harmony("SimpleKerningEffect.TextInfoAcquisitionPatch");
 
             var textOriginal = AccessTools.Method("YukkuriMovieMaker.Player.Video.Items.TextSource:UpdateResource");
             var textPostfix = typeof(PatchText).GetMethod(nameof(PatchText.Postfix));
