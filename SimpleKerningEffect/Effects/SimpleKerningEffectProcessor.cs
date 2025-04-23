@@ -107,7 +107,7 @@ namespace SimpleKerningEffect.Effects
                 {
                     int index = 0;
 
-                    while ((index = inputTextOneLine.IndexOf(texts[i], index)) != -1 && texts[i] != "")
+                    while ((index = inputTextOneLine.IndexOf(texts[i], index, StringComparison.Ordinal)) != -1 && texts[i] != "")
                     {
                         if ((index <= inputIndex - 1) && (inputIndex <= index + texts[i].Length))
                         {
