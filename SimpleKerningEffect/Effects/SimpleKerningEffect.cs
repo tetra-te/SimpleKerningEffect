@@ -63,7 +63,7 @@ namespace SimpleKerningEffect.Effects
         public string Texts { get => texts; set => Set(ref texts, value); }
         string texts = string.Empty;
 
-        [Display(GroupName = "カーニング対象", Name = "正規表現", Description = "正規表現にマッチする部分を対象に含めます\r\n記述内容によってはパフォーマンスに問題が発生することがあります")]
+        [Display(GroupName = "カーニング対象", Name = "正規表現", Description = "正規表現にマッチする部分を対象に含めます")]
         [TextEditor(AcceptsReturn = true)]
         public string Regex { get => regex; set => Set(ref regex, value); }
         string regex = string.Empty;
