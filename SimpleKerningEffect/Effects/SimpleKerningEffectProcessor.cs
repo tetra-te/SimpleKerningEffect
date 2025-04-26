@@ -24,6 +24,13 @@ namespace SimpleKerningEffect.Effects
 
         public DrawDescription Update(EffectDescription effectDescription)
         {
+            var frame = effectDescription.ItemPosition.Frame;
+            var length = effectDescription.ItemDuration.Frame;
+            var fps = effectDescription.FPS;
+
+            var interval = (int)item.Interval.GetValue(frame, length, fps);
+            var gap = (int)item.Gap.GetValue(frame, length, fps);
+
             var drawDesc = effectDescription.DrawDescription;
             var inputText = Storage.GetText(effectDescription);
             var hasInputText = inputText != "";
@@ -46,6 +53,10 @@ namespace SimpleKerningEffect.Effects
             if (item.Even && !match)
             {
                 match = (inputIndex % 2 == 0);
+            }
+            if (interval != 0 && !match)
+            {
+                match = (inputIndex - gap) % interval == 0;
             }
             if (item.Hiragana && !match && hasInputText)
             {
@@ -144,11 +155,6 @@ namespace SimpleKerningEffect.Effects
                 chain.ClearChain();
                 return drawDesc;
             }
-
-
-            var frame = effectDescription.ItemPosition.Frame;
-            var length = effectDescription.ItemDuration.Frame;
-            var fps = effectDescription.FPS;
 
             var x = item.X.GetValue(frame, length, fps);
             var y = item.Y.GetValue(frame, length, fps);

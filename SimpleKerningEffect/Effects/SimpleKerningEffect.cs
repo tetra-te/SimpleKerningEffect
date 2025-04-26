@@ -68,6 +68,14 @@ namespace SimpleKerningEffect.Effects
         public string Regex { get => regex; set => Set(ref regex, value); }
         string regex = string.Empty;
 
+        [Display(GroupName = "カーニング対象（指定間隔）", Name = "間隔", Description = "間隔")]
+        [AnimationSlider("F0", "", 0, 5)]
+        public Animation Interval { get; } = new Animation(0, 0, 99999);
+
+        [Display(GroupName = "カーニング対象（指定間隔）", Name = "ずれ", Description = "ずれ")]
+        [AnimationSlider("F0", "", -5, 5)]
+        public Animation Gap { get; } = new Animation(0, -99999, 99999);
+
         [Display(GroupName = "描画", Name = "X", Description = "描画位置（横方向）")]
         [AnimationSlider("F1", "px", -500, 500)]
         public Animation X { get; } = new Animation(0, -99999, 99999);
@@ -112,6 +120,6 @@ namespace SimpleKerningEffect.Effects
             return new SimpleKerningEffectProcessor(this, devices);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [X, Y, Z, Opacity, Zoom, Rotation, .. Effects];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [Interval, Gap, X, Y, Z, Opacity, Zoom, Rotation, .. Effects];
     }
 }
