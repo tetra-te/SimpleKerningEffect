@@ -4,7 +4,7 @@ using YukkuriMovieMaker.Project.Items;
 
 namespace SimpleKerningEffect.Patch
 {
-    public class PatchText
+    public class TextPostfix
     {     
         public static void Postfix(TimelineItemSourceDescription desc, object __instance)
         {
