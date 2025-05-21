@@ -2,7 +2,7 @@
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Project.Items;
 
-namespace SimpleKerningEffect
+namespace SimpleKerningEffect.Patch
 {
     public static class Storage
     {

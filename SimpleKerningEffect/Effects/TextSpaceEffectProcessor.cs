@@ -1,6 +1,7 @@
 ﻿using Vortice.Direct2D1;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Project.Items;
+using SimpleKerningEffect.Patch;
 
 namespace SimpleKerningEffect.Effects
 {
