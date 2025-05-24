@@ -2,9 +2,9 @@
 using System.Reflection.Emit;
 using HarmonyLib;
 
-namespace SimpleKerningEffect.Patch
+namespace SimpleKerningEffect.Patch.Transpiler
 {
-    public static class JimakuTranspiler
+    public static class JimakuRewriter
     {
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -15,19 +15,19 @@ namespace SimpleKerningEffect.Patch
             var itemGetterVideoEffects = AccessTools.PropertyGetter("YukkuriMovieMaker.Project.Items.VoiceItem:JimakuVideoEffects");
             
             // 文字ごとに分割用
-            var setDevided = typeof(SetValue).GetMethod(nameof(SetValue.SetDevided));
-
             var characterGetterIsDevided = AccessTools.PropertyGetter("YukkuriMovieMaker.Project.Character:IsDevidedPerCharacter") ??
                                            AccessTools.PropertyGetter("YukkuriMovieMaker.Project.Character:IsDividedPerCharacter");
 
             var itemGetterIsDevided = AccessTools.PropertyGetter("YukkuriMovieMaker.Project.Items.VoiceItem:IsDevidedPerCharacter") ?? 
                                       AccessTools.PropertyGetter("YukkuriMovieMaker.Project.Items.VoiceItem:IsDividedPerCharacter");
+            
+            var setDevided = typeof(SetValue).GetMethod(nameof(SetValue.SetDevided));
 
             // 行の高さ用
+            var setLineHeight = typeof(SetValue).GetMethod(nameof(SetValue.SetLineHeight));
             var methodGetValue = AccessTools.Method("YukkuriMovieMaker.Commons.Animation:GetValue");
             var characterGetterLineHeight = AccessTools.PropertyGetter("YukkuriMovieMaker.Project.Character:LineHeight2");
             var itemGetterLineHeight = AccessTools.PropertyGetter("YukkuriMovieMaker.Project.Items.VoiceItem:LineHeight2");
-            var setLineHeight = typeof(SetValue).GetMethod(nameof(SetValue.SetLineHeight));
             var characterGetterLineHeightFound = false;
             var itemGetterLineHeightFound = false;
             

@@ -1,8 +1,6 @@
 ﻿using System.Collections.Immutable;
 using YukkuriMovieMaker.Plugin.Effects;
 using SimpleKerningEffect.Effects;
-using YukkuriMovieMaker.Commons;
-using HarmonyLib;
 
 namespace SimpleKerningEffect.Patch
 {

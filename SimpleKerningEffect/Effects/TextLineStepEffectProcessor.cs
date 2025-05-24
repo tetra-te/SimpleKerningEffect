@@ -54,10 +54,7 @@ namespace SimpleKerningEffect.Effects
                 } 
             }
 
-            if (item.AnimationSlider.KeyFrames is null)
-                return effectDescription.DrawDescription;
-
-            var keyFrames = item.AnimationSlider.KeyFrames.Frames;
+            var keyFrames = Storage.GetKeyFrames(effectDescription);
 
             var frame = effectDescription.ItemPosition.Frame;
 

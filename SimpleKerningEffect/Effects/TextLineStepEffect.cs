@@ -10,9 +10,6 @@ namespace SimpleKerningEffect.Effects
     {
         public override string Label => "テキスト行を中間点ごとに表示";
 
-        // アイテムの中間点を取得するためのアニメーションスライダー
-        public Animation AnimationSlider { get; } = new Animation(0, 0, 0);
-
         public override IEnumerable<string> CreateExoVideoFilters(int keyFrameIndex, ExoOutputDescription exoOutputDescription)
         {
             return [];
@@ -23,6 +20,6 @@ namespace SimpleKerningEffect.Effects
             return new TextLineStepEffectProcessor(this);
         }
 
-        protected override IEnumerable<IAnimatable> GetAnimatables() => [AnimationSlider];
+        protected override IEnumerable<IAnimatable> GetAnimatables() => [];
     }
 }

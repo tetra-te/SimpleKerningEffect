@@ -2,9 +2,9 @@
 using System.Reflection.Emit;
 using HarmonyLib;
 
-namespace SimpleKerningEffect.Patch
+namespace SimpleKerningEffect.Patch.Transpiler
 {
-    public static class TextTranspiler
+    public static class TextRewriter
     {        
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
