@@ -4,6 +4,7 @@ using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using SimpleKerningEffect.ForVideoEffectChain;
 using SimpleKerningEffect.Patch;
+using System.Globalization;
 
 namespace SimpleKerningEffect.Effects
 {
@@ -14,7 +15,6 @@ namespace SimpleKerningEffect.Effects
         int oldLenOfEffects;
 
         public ID2D1Image Output => chain.Output ?? throw new NullReferenceException("output of " + nameof(chain) + "is null");
-        static readonly string[] separator = [",", "\r\n"];
 
         public SimpleKerningEffectProcessor(SimpleKerningEffect item, IGraphicsDevicesAndContext devices)
         {
@@ -27,16 +27,32 @@ namespace SimpleKerningEffect.Effects
         {
             var drawDesc = effectDescription.DrawDescription;
             var inputText = Storage.GetText(effectDescription);
-            var hasInputText = inputText != "";
+
+            if (string.IsNullOrEmpty(inputText))
+            {
+                chain.ClearChain();
+                return drawDesc;
+            }
             
             var inputIndex = effectDescription.InputIndex + 1;
             var inputCount = effectDescription.InputCount;
-            var inputTextOneLine = inputText.Replace("\r\n", "");
-            
-            char inputChar = 'a';
+            var inputTextOneLine = inputText.Replace("\r\n", "")
+                                            .Replace("\n", "")
+                                            .Replace("\r", "");
 
-            if (hasInputText)
-                inputChar = inputTextOneLine[inputIndex - 1];
+            if (string.IsNullOrEmpty(inputTextOneLine))
+            {
+                chain.ClearChain();
+                return drawDesc;
+            }
+
+            if (effectDescription.InputIndex < 0 || effectDescription.InputIndex >= Length(inputTextOneLine))
+            {
+                chain.ClearChain();
+                return drawDesc;
+            }
+
+            var inputElem= ElementAt(inputTextOneLine, effectDescription.InputIndex);
 
             var match = false;
 
@@ -48,38 +64,38 @@ namespace SimpleKerningEffect.Effects
             {
                 match = (inputIndex % 2 == 0);
             }
-            if (item.Hiragana && !match && hasInputText)
+            if (item.Hiragana && !match && inputElem is [var c])
             {
-                match = ('\u3041' <= inputChar && inputChar <= '\u3096') ||
-                        ('\u309D' <= inputChar && inputChar <= '\u309F') ||
-                        (inputChar == 'ー');
+                match = ('\u3041' <= c && c <= '\u3096') ||
+                        ('\u309D' <= c && c <= '\u309F') ||
+                        (c == 'ー');
             }
-            if (item.Katakana && !match && hasInputText)
+            if (item.Katakana && !match && inputElem is [var d])
             {
-                match = ('\u30A1' <= inputChar && inputChar <= '\u30FA') ||
-                        ('\u30FD' <= inputChar && inputChar <= '\u30FF') ||
-                        (inputChar == 'ー');
+                match = ('\u30A1' <= d && d <= '\u30FA') ||
+                        ('\u30FD' <= d && d <= '\u30FF') ||
+                        (d == 'ー');
             }
-            if (item.Kanji && !match && hasInputText)
+            if (item.Kanji && !match && inputElem is [var e])
             {
-                match = ('\u4E00' <= inputChar && inputChar <= '\u9FFF') ||
-                        ('\u3400' <= inputChar && inputChar <= '\u4DBF') ||
-                        ('\uF900' <= inputChar && inputChar <= '\uFAFF');
+                match = ('\u4E00' <= e && e <= '\u9FFF') ||
+                        ('\u3400' <= e && e <= '\u4DBF') ||
+                        ('\uF900' <= e && e <= '\uFAFF');
             }
-            if (item.Number && !match && hasInputText)
+            if (item.Number && !match && inputElem is [var f])
             {
-                match = char.IsDigit(inputChar);
+                match = char.IsDigit(f);
             }
-            if (item.Alphabet && !match && hasInputText)
+            if (item.Alphabet && !match && inputElem is [var g])
             {
-                match = ('a' <= inputChar && inputChar <= 'z') ||
-                        ('A' <= inputChar && inputChar <= 'Z');
+                match = ('a' <= g && g <= 'z') ||
+                        ('A' <= g && g <= 'Z');
             }
             if (!match)
             {
                 match = ContainsNum(item.Index, inputIndex, inputCount);
             }
-            if (!match && hasInputText)
+            if (!match)
             {
                 var inputLine = inputText.Split("\r\n");
                 var lineCount = inputLine.Length;
@@ -88,7 +104,7 @@ namespace SimpleKerningEffect.Effects
 
                 for (int i = 0; i < lineCount; i++)
                 {
-                    textCount += inputLine[i].Length;
+                    textCount += Length(inputLine[i]);
                     if (textCount >= inputIndex)
                     {
                         currentLine = i + 1;
@@ -98,9 +114,9 @@ namespace SimpleKerningEffect.Effects
 
                 match = ContainsNum(item.Line, currentLine, lineCount);
             }
-            if (!match && hasInputText)
+            if (!match)
             {
-                var texts = item.Texts.Split(separator, StringSplitOptions.None);
+                var texts = item.Texts.Split([",", "\r\n"], StringSplitOptions.None);
 
                 var shouldBreak = false;
 
@@ -110,7 +126,10 @@ namespace SimpleKerningEffect.Effects
 
                     while ((index = inputTextOneLine.IndexOf(texts[i], index, StringComparison.Ordinal)) != -1 && texts[i] != "")
                     {
-                        if ((index <= inputIndex - 1) && (inputIndex <= index + texts[i].Length))
+                        var (startElem, endElem) = CodeUnitRangeToTextElementRange(inputTextOneLine, index, texts[i].Length);
+                        int curElem = effectDescription.InputIndex;
+
+                        if (startElem <= curElem && curElem < endElem)
                         {
                             match = true;
                             shouldBreak = true;
@@ -123,7 +142,7 @@ namespace SimpleKerningEffect.Effects
                 }
             }
             var pattern = item.Regex;
-            if (!match && pattern != "" && hasInputText)
+            if (!match && pattern != "")
             {
                 try
                 {
@@ -131,7 +150,10 @@ namespace SimpleKerningEffect.Effects
 
                     foreach (Match matchRegex in matches)
                     {
-                        if ((matchRegex.Index <= inputIndex - 1) && (inputIndex <= matchRegex.Index + matchRegex.Length))
+                        var (startElem, endElem) = CodeUnitRangeToTextElementRange(inputTextOneLine, matchRegex.Index, matchRegex.Length);
+                        var curElem = effectDescription.InputIndex;
+
+                        if (startElem <= curElem && curElem < endElem)
                         {
                             match = true;
                             break;
@@ -198,11 +220,15 @@ namespace SimpleKerningEffect.Effects
         }
 
         static bool ContainsNum(string numbersExpression, int searchTarget, int length)
-        {
-            bool match = false;
-
+        {                              
             numbersExpression = numbersExpression.Replace(" ", "");
-            var part = numbersExpression.Split(separator, StringSplitOptions.None);
+
+            if (string.IsNullOrEmpty(numbersExpression) || searchTarget > length)
+                return false;
+
+            var match = false;
+
+            var part = numbersExpression.Split([",", "\r\n"], StringSplitOptions.None);
 
             for (int i = 0; i < part.Length; i++)
             {
@@ -232,6 +258,34 @@ namespace SimpleKerningEffect.Effects
             }
 
             return match;
+        }
+
+        private static int Length(string str)
+        {
+            return new StringInfo(str).LengthInTextElements;
+        }
+
+        private static string ElementAt(string str, int index)
+        {
+            var si = new StringInfo(str);
+
+            if ((uint)index >= (uint)si.LengthInTextElements)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            return si.SubstringByTextElements(index, 1);
+        }
+
+        private static (int StartElem, int EndElem) CodeUnitRangeToTextElementRange(string s, int codeStart, int codeLength)
+        {
+            var starts = StringInfo.ParseCombiningCharacters(s);
+            var startPos = Array.BinarySearch(starts, codeStart);
+            var startElem = startPos >= 0 ? startPos : ~startPos - 1;
+
+            int codeEnd = codeStart + codeLength;
+            int endPos = Array.BinarySearch(starts, codeEnd);
+            int endElem = endPos >= 0 ? endPos : ~endPos;
+
+            return (startElem, endElem);
         }
 
         public void ClearInput()
