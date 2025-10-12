@@ -4,7 +4,7 @@ using SimpleKerningEffect.Patch;
 
 namespace SimpleKerningEffect.Effects
 {
-    internal class TextLineStepEffectProcessor : IVideoEffectProcessor
+    public class TextLineStepEffectProcessor : IVideoEffectProcessor
     {
         ID2D1Image? input;
 

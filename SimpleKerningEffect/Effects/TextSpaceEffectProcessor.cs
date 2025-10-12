@@ -5,7 +5,7 @@ using SimpleKerningEffect.Patch;
 
 namespace SimpleKerningEffect.Effects
 {
-    internal class TextSpaceEffectProcessor : IVideoEffectProcessor
+    public class TextSpaceEffectProcessor : IVideoEffectProcessor
     {
         readonly TextSpaceEffect item;
         ID2D1Image? input;

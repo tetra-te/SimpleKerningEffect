@@ -2,7 +2,7 @@
 
 namespace SimpleKerningEffect.Effects
 {
-    enum WritingDirection
+    public enum WritingDirection
     {
         [Display(Name = "自動", Description = "横書き・縦書きを自動判定します")]
         Auto,

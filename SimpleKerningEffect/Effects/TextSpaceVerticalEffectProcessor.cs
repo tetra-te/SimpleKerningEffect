@@ -3,7 +3,7 @@ using YukkuriMovieMaker.Player.Video;
 
 namespace SimpleKerningEffect.Effects
 {
-    internal class TextSpaceVerticalEffectProcessor : IVideoEffectProcessor
+    public class TextSpaceVerticalEffectProcessor : IVideoEffectProcessor
     {
         readonly TextSpaceVerticalEffect item;
         ID2D1Image? input;

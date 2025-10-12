@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace SimpleKerningEffect.Effects
 {
-    internal class SimpleKerningEffectProcessor : IVideoEffectProcessor
+    public class SimpleKerningEffectProcessor : IVideoEffectProcessor
     {
         readonly SimpleKerningEffect item;
         readonly VideoEffectChainNode chain;

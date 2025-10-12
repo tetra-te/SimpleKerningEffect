@@ -6,7 +6,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 namespace SimpleKerningEffect.Effects
 {
     [VideoEffect("テキスト行を中間点ごとに表示", ["テキスト"], ["text", "line", "keyframe"], IsEffectItemSupported = false, IsAviUtlSupported = false)]
-    internal class TextLineStepEffect : VideoEffectBase
+    public class TextLineStepEffect : VideoEffectBase
     {
         public override string Label => "テキスト行を中間点ごとに表示";
 

@@ -9,7 +9,7 @@ using YukkuriMovieMaker.Player.Video;
 
 namespace SimpleKerningEffect.ForVideoEffectChain
 {
-    internal class FrameAndLength
+    public class FrameAndLength
     {
         public int Frame;
         public int Length;

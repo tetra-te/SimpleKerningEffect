@@ -12,7 +12,7 @@ using System.Collections.Immutable;
 
 namespace SimpleKerningEffect.ForVideoEffectChain
 {
-    internal class VideoEffectChainNode
+    public class VideoEffectChainNode
     {
         readonly IGraphicsDevicesAndContext devices;
         readonly AffineTransform2D transform;

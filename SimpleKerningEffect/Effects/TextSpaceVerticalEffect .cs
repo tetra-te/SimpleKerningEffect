@@ -10,7 +10,7 @@ namespace SimpleKerningEffect.Effects
 {
     [Obsolete("代わりにTextSpaceEffectを使用します")]
     [VideoEffect("文字間隔調整（縦書）", ["テキスト"], ["kerning", "文字", "テキスト", "text", "プラグイン", "plugin"], isAviUtlSupported:false, isEffectItemSupported:false)]
-    internal class TextSpaceVerticalEffect : VideoEffectBase
+    public class TextSpaceVerticalEffect : VideoEffectBase
     {
         public override string Label => $"文字間隔調整（縦書） {Space.GetValue(0, 1, 30):F1}";
 

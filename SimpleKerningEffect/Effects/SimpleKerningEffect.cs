@@ -9,7 +9,7 @@ using YukkuriMovieMaker.Plugin.Effects;
 namespace SimpleKerningEffect.Effects
 {
     [VideoEffect("簡易カーニング", ["テキスト"], ["kerning", "文字", "テキスト", "text", "プラグイン", "plugin"], isAviUtlSupported:false, isEffectItemSupported:false)]
-    internal class SimpleKerningEffect : VideoEffectBase
+    public class SimpleKerningEffect : VideoEffectBase
     {
         public override string Label => "簡易カーニング";
 
