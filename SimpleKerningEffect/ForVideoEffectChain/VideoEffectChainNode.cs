@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vortice.Direct2D1.Effects;
+﻿using Vortice.Direct2D1.Effects;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
@@ -12,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace SimpleKerningEffect.ForVideoEffectChain
 {
-    public class VideoEffectChainNode
+    public class VideoEffectChainNode : IDisposable
     {
         readonly IGraphicsDevicesAndContext devices;
         readonly AffineTransform2D transform;
