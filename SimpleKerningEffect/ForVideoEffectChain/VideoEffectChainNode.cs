@@ -80,6 +80,8 @@ namespace SimpleKerningEffect.ForVideoEffectChain
 
                     if (lastTimelineSourceDescription is not null && lastDrawDescription is not null)
                         UpdateOutputAndDescription(lastTimelineSourceDescription, lastDrawDescription);
+                    else
+                        transform.SetInput(0, input, true);
                 }
                 else
                 {
