@@ -295,8 +295,7 @@ namespace SimpleKerningEffect.Effects
 
         public void SetInput(ID2D1Image? input)
         {
-            chain.SetInput(input);
-            chain.UpdateChain(item.Effects);
+            chain.SetInputAndEffects(input, item.Effects);
         }
 
         public void Dispose()

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vortice.Direct2D1.Effects;
+﻿using Vortice.Direct2D1.Effects;
 using Vortice.Direct2D1;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
@@ -12,7 +7,7 @@ using System.Collections.Immutable;
 
 namespace SimpleKerningEffect.ForVideoEffectChain
 {
-    public class VideoEffectChainNode
+    public class VideoEffectChainNode : IDisposable
     {
         readonly IGraphicsDevicesAndContext devices;
         readonly AffineTransform2D transform;
@@ -21,6 +16,8 @@ namespace SimpleKerningEffect.ForVideoEffectChain
         ID2D1Image? input;
         bool isEmpty;
         List<(IVideoEffect effect, IVideoEffectProcessor processor)> Chain = [];
+        TimelineItemSourceDescription? lastTimelineSourceDescription;
+        DrawDescription? lastDrawDescription;
 
         ID2D1Image output;
         public ID2D1Image Output => isEmpty ? empty : output;
@@ -62,7 +59,7 @@ namespace SimpleKerningEffect.ForVideoEffectChain
             Chain = newChain;
         }
 
-        public void SetInput(ID2D1Image? input)
+        public void SetInputAndEffects(ID2D1Image? input, ImmutableList<IVideoEffect> effects)
         {
             this.input = input;
             if (input == null)
@@ -72,10 +69,14 @@ namespace SimpleKerningEffect.ForVideoEffectChain
             }
             else
             {
-                if (Chain.Count > 0)
+                if (effects.Count > 0)
                 {
-                    Chain.First().processor.SetInput(input);
-                    transform.SetInput(0, Chain.Last().processor.Output, true);
+                    UpdateChain(effects);
+
+                    if (lastTimelineSourceDescription is not null && lastDrawDescription is not null)
+                        UpdateOutputAndDescription(lastTimelineSourceDescription, lastDrawDescription);
+                    else
+                        transform.SetInput(0, input, true);
                 }
                 else
                 {
@@ -110,6 +111,9 @@ namespace SimpleKerningEffect.ForVideoEffectChain
 
         public DrawDescription UpdateOutputAndDescription(TimelineItemSourceDescription timelineSourceDescription, DrawDescription drawDescription)
         {
+            lastTimelineSourceDescription = timelineSourceDescription;
+            lastDrawDescription = drawDescription;
+
             if (input == null)
             {
                 isEmpty = true;
