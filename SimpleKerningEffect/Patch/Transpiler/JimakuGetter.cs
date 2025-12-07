@@ -1,18 +1,17 @@
 ﻿using System.Reflection.Emit;
-using HarmonyLib;
 
 namespace SimpleKerningEffect.Patch.Transpiler
 {
     public class JimakuGetter
     {     
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        public static IEnumerable<object> Transpiler(IEnumerable<object> instructions)
         {
-            var item = AccessTools.Field("YukkuriMovieMaker.Player.Video.Items.JimakuSource:item");
-            
-            var text = AccessTools.PropertyGetter("YukkuriMovieMaker.Project.Items.VoiceItem:Serif");
-            var basePoint = AccessTools.PropertyGetter("YukkuriMovieMaker.Project.Items.VoiceItem:BasePoint");
-            var volume = AccessTools.PropertyGetter("YukkuriMovieMaker.Project.Items.VoiceItem:Volume");
-            var keyFrames = AccessTools.PropertyGetter("YukkuriMovieMaker.Commons.Animation:KeyFrames");
+            var item = HRef.AccessToolsField.Invoke(null, ["YukkuriMovieMaker.Player.Video.Items.JimakuSource:item"]);
+
+            var text = HRef.AccessToolsPropertyGetter.Invoke(null, ["YukkuriMovieMaker.Project.Items.VoiceItem:Serif"]);
+            var basePoint = HRef.AccessToolsPropertyGetter.Invoke(null, ["YukkuriMovieMaker.Project.Items.VoiceItem:BasePoint"]);
+            var volume = HRef.AccessToolsPropertyGetter.Invoke(null, ["YukkuriMovieMaker.Project.Items.VoiceItem:Volume"]);
+            var keyFrames = HRef.AccessToolsPropertyGetter.Invoke(null, ["YukkuriMovieMaker.Commons.Animation:KeyFrames"]);
             
             var setText = typeof(Storage).GetMethod(nameof(Storage.SetText));
             var setBasePoint = typeof(Storage).GetMethod(nameof(Storage.SetBasePoint));
@@ -20,26 +19,26 @@ namespace SimpleKerningEffect.Patch.Transpiler
             
             foreach (var code in instructions)
             {
-                if (code.opcode == OpCodes.Ret)
+                if ((OpCode)HRef.opcode.GetValue(code)! == OpCodes.Ret)
                 {
-                    yield return new CodeInstruction(OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, item);
-                    yield return new CodeInstruction(OpCodes.Callvirt, text);
-                    yield return new CodeInstruction(OpCodes.Call, setText);
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Ldarg_1, null])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Ldarg_0, null])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Ldfld, item])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Callvirt, text])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Call, setText])!;
 
-                    yield return new CodeInstruction(OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, item);
-                    yield return new CodeInstruction(OpCodes.Callvirt, basePoint);
-                    yield return new CodeInstruction(OpCodes.Call, setBasePoint);
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Ldarg_1, null])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Ldarg_0, null])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Ldfld, item])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Callvirt, basePoint])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Call, setBasePoint])!;
 
-                    yield return new CodeInstruction(OpCodes.Ldarg_1);
-                    yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Ldfld, item);
-                    yield return new CodeInstruction(OpCodes.Callvirt, volume);
-                    yield return new CodeInstruction(OpCodes.Callvirt, keyFrames);
-                    yield return new CodeInstruction(OpCodes.Call, setKeyFrames);
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Ldarg_1, null])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Ldarg_0, null])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Ldfld, item])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Callvirt, volume])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Callvirt, keyFrames])!;
+                    yield return Activator.CreateInstance(HRef.CodeInstruction, [OpCodes.Call, setKeyFrames])!;
                 }
 
                 yield return code;

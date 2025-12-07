@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Vortice.Mathematics;
-using YukkuriMovieMaker.Commons;
-using YukkuriMovieMaker.Player.Video;
+﻿using YukkuriMovieMaker.Player.Video;
 
 namespace SimpleKerningEffect.ForVideoEffectChain
 {
