@@ -9,7 +9,7 @@ namespace SimpleKerningEffect.Patch
     {
         static string harmonyPath = Path.Combine(AppDirectories.PluginDirectory, "SimpleKerningEffect", "lib.har.ymmelib");
 
-        static AssemblyLoadContext context = new LoadContext(harmonyPath);
+        static AssemblyLoadContext context = new LoadContext();
 
         static Assembly assembly = context.LoadFromAssemblyPath(harmonyPath);
 
