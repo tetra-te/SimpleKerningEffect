@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Project.Items;
@@ -8,41 +7,40 @@ namespace SimpleKerningEffect.Patch
 {
     public static class Storage
     {
-        public static ConcurrentDictionary<(Guid, int), string> Texts = new();
-
-        public static ConcurrentDictionary<(Guid, int), BasePoint> BasePoints = new();
-
-        public static ConcurrentDictionary<(Guid, int), ImmutableList<int>> KeyFrames = new();
-
-        public static void SetText(TimelineItemSourceDescription desc, string text)
+        readonly record struct ItemKey(Guid SceneId, TimelineSourceUsage Usage, int Layer, int StartFrame, int Length)
         {
-            Texts[(desc.SceneId, desc.Layer)] = text;
-        }
-        
-        public static string GetText(EffectDescription desc)
-        {
-            return Texts.GetValueOrDefault((desc.SceneId, desc.Layer), "");
+            public static ItemKey From(TimelineItemSourceDescription d)
+                => new(d.SceneId, d.Usage, d.Layer,
+                       d.TimelinePosition.Frame - d.ItemPosition.Frame,  // アイテム開始フレーム
+                       d.ItemDuration.Frame);
         }
 
-        public static void SetBasePoint(TimelineItemSourceDescription desc, BasePoint basePoint)
+        sealed class Slot
         {
-            BasePoints[(desc.SceneId, desc.Layer)] = basePoint;
+            public ItemKey Key;
+            public string Text = "";
+            public BasePoint BasePoint = BasePoint.LeftTop;
+            public ImmutableList<int> KeyFrames = ImmutableList<int>.Empty;
         }
 
-        public static BasePoint GetBasePoint(EffectDescription desc)
+        [ThreadStatic] static Slot? slot;
+
+        static Slot Write(TimelineItemSourceDescription desc)
         {
-            return BasePoints.GetValueOrDefault((desc.SceneId, desc.Layer), BasePoint.LeftTop);
+            var s = slot ??= new Slot();
+            s.Key = ItemKey.From(desc);
+            return s;
         }
 
-        public static void SetKeyFrames(TimelineItemSourceDescription desc, KeyFrames? keyFrames)
-        {
-            if (keyFrames is null) return;
-            KeyFrames[(desc.SceneId, desc.Layer)] = keyFrames.Frames;
-        }
+        static Slot? Read(EffectDescription desc)
+            => slot is { } s && s.Key == ItemKey.From(desc) ? s : null;
 
-        public static ImmutableList<int> GetKeyFrames(EffectDescription desc)
-        {
-            return KeyFrames.GetValueOrDefault((desc.SceneId, desc.Layer), ImmutableList<int>.Empty);
-        }
+        public static void SetText(TimelineItemSourceDescription desc, string text) => Write(desc).Text = text ?? "";
+        public static void SetBasePoint(TimelineItemSourceDescription desc, BasePoint b) => Write(desc).BasePoint = b;
+        public static void SetKeyFrames(TimelineItemSourceDescription desc, KeyFrames? k) { if (k is not null) Write(desc).KeyFrames = k.Frames; }
+
+        public static string GetText(EffectDescription desc) => Read(desc)?.Text ?? "";
+        public static BasePoint GetBasePoint(EffectDescription desc) => Read(desc)?.BasePoint ?? BasePoint.LeftTop;
+        public static ImmutableList<int> GetKeyFrames(EffectDescription desc) => Read(desc)?.KeyFrames ?? ImmutableList<int>.Empty;
     }
 }
